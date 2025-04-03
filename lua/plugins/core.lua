@@ -1,4 +1,7 @@
 return {
+  {
+    "numToStr/Comment.nvim",
+  },
   { "nvim-tree/nvim-web-devicons", opts = {} },
   {
     "mfussenegger/nvim-dap",
@@ -11,6 +14,12 @@ return {
         "<leader>d",
         function()
           require("dap").toggle_breakpoint()
+        end,
+      },
+      {
+        "<C-t>",
+        function()
+          require("dapui").toggle()
         end,
       },
       {
@@ -29,6 +38,7 @@ return {
     "mfussenegger/nvim-dap",
     dependencies = {
       "rcarriga/nvim-dap-ui",
+      "mfussenegger/nvim-dap-python",
       "nvim-neotest/nvim-nio",
       "mxsdev/nvim-dap-vscode-js",
       {
@@ -55,6 +65,7 @@ return {
     config = function()
       local dap, dapui = require("dap"), require("dapui")
 
+      require("dap-python").setup("~/.virtualenvs/debugpy/bin/python")
       require("dapui").setup()
       require("dap-go").setup()
 
@@ -67,6 +78,44 @@ return {
           processId = require("dap.utils").pick_process,
         },
       })
+
+      table.insert(require("dap").configurations.python, {
+        type = "python",
+        request = "attach",
+        name = "Python Attach",
+        connect = function()
+          local host = vim.fn.input("Host [0.0.0.0]: ")
+          host = host ~= "" and host or "0.0.0.0"
+          local port = tonumber(vim.fn.input("Port [9000]: ")) or 9000
+          return { host = host, port = port }
+        end,
+        pathMappings = {
+          { localRoot = "${workspaceFolder}", remoteRoot = "/src" },
+        },
+        justMyCode = false,
+      })
+
+      -- local pythonAttachConfig = {
+      --   type = "python",
+      --   request = "attach",
+      --   connect = {
+      --     port = 9000,
+      --     host = "0.0.0.0",
+      --   },
+      --   mode = "remote",
+      --   name = "Container Attach (with choose remote dir)",
+      --   cwd = vim.fn.getcwd(),
+      --   pathMappings = {
+      --     {
+      --       localRoot = vim.fn.getcwd(),
+      --       remoteRoot = function()
+      --         -- NEED to choose correct folder for set breakpoints
+      --         return vim.fn.input("Container code folder > ", ".", "src")
+      --       end,
+      --     },
+      --   },
+      -- }
+      -- table.insert(require("dap").configurations.python, pythonAttachConfig)
 
       dap.listeners.before.attach.dapui_config = function()
         dapui.open()

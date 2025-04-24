@@ -14,6 +14,7 @@ require("codecompanion").setup({
     },
     inline = {
       adapter = "ollama",
+      -- adapter = "gemini",
     },
   },
   adapters = {

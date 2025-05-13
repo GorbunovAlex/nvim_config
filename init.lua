@@ -13,8 +13,8 @@ require("codecompanion").setup({
       adapter = "gemini",
     },
     inline = {
-      adapter = "ollama",
-      -- adapter = "gemini",
+      -- adapter = "ollama",
+      adapter = "gemini",
     },
   },
   adapters = {
@@ -36,5 +36,10 @@ require("codecompanion").setup({
         },
       })
     end,
+  },
+})
+require("lspconfig").ruff.setup({
+  init_options = {
+    settings = {},
   },
 })

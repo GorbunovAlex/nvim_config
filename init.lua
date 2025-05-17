@@ -37,6 +37,16 @@ require("codecompanion").setup({
       })
     end,
   },
+  extensions = {
+    mcphub = {
+      callback = "mcphub.extensions.codecompanion",
+      opts = {
+        show_result_in_chat = true,
+        make_vars = true,
+        make_slash_commands = true,
+      },
+    },
+  },
 })
 require("lspconfig").ruff.setup({
   init_options = {

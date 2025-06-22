@@ -26,6 +26,16 @@ require("codecompanion").setup({
         },
       })
     end,
+    local_gemma3_4b = function()
+      return require("codecompanion.adapters").extend("ollama", {
+        name = "gemma3:4b",
+        schema = {
+          model = {
+            default = "gemma3:4b-it-qat",
+          },
+        },
+      })
+    end,
     qwen = function()
       return require("codecompanion.adapters").extend("ollama", {
         name = "qwen",

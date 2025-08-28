@@ -3,6 +3,7 @@ require("config.lazy")
 require("lazydev").setup()
 require("lspconfig").pyright.setup({})
 require("flutter-tools").setup({})
+require("lspconfig").clangd.setup({})
 
 local env_util = require("utils.env_util")
 local env_vars = env_util.load_env_file()

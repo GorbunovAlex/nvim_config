@@ -3,7 +3,28 @@ require("config.lazy")
 require("lazydev").setup()
 require("lspconfig").pyright.setup({})
 require("flutter-tools").setup({})
-require("lspconfig").clangd.setup({})
+require("lspconfig").clangd.setup({
+  cmd = {
+    "clangd",
+    "--background-index",
+    "--clang-tidy",
+    "--header-insertion=iwyu",
+    "--completion-style=detailed",
+    "--function-arg-placeholders=true", -- FIX: Added '=true'
+    "--fallback-style=llvm",
+  },
+  settings = {
+    clangd = {
+      inlayHints = {
+        -- FIX: Disable all inlay hints to prevent crashes
+        enabled = false,
+      },
+    },
+  },
+})
+
+vim.opt.termguicolors = true
+vim.cmd([[colorscheme arctic-abyssal]])
 
 local env_util = require("utils.env_util")
 local env_vars = env_util.load_env_file()

@@ -6,6 +6,9 @@ return {
       -- Your options go here
       -- name = "venv",
       -- auto_refresh = false
+      auto_refresh = false,
+      auto_set_venv = false,
+      auto_activate = true,
     })
   end,
   event = "VeryLazy", -- Optional: needed only if you want to type `:VenvSelect` without a keymapping

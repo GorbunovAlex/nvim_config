@@ -1,9 +1,45 @@
+local lspconfig = require("lspconfig")
+
 -- bootstrap lazy.nvim, LazyVim and your plugins
+
 require("config.lazy")
 require("lazydev").setup()
-require("lspconfig").pyright.setup({})
+
+-------------------------------------------------
+-- Python
+-------------------------------------------------
+
+-- 1. Configure Pyright (Strictly for Type Checking)
+lspconfig.pyright.setup({
+  settings = {
+    pyright = {
+      -- Use Ruff's import organizer instead
+      disableOrganizeImports = true,
+    },
+    python = {
+      analysis = {
+        -- Let Ruff handle these
+        ignore = { "*" },
+        typeCheckingMode = "standard", -- or "basic"
+      },
+    },
+  },
+})
+-- 2. Configure Ruff (For Linting, Formatting, and Code Actions)
+lspconfig.ruff.setup({
+  init_options = {
+    settings = {
+      -- Any specific Ruff settings go here
+      -- e.g., lint = { select = {"E", "F", "I"} }
+    },
+  },
+})
+
+-------------------------------------------------
+
 require("flutter-tools").setup({})
-require("lspconfig").clangd.setup({
+
+lspconfig.clangd.setup({
   cmd = {
     "clangd",
     "--background-index",
@@ -24,7 +60,7 @@ require("lspconfig").clangd.setup({
 })
 
 vim.opt.termguicolors = true
-vim.cmd([[colorscheme arctic-abyssal]])
+-- vim.cmd([[colorscheme arctic-abyssal]]
 
 local env_util = require("utils.env_util")
 local env_vars = env_util.load_env_file()
@@ -78,10 +114,5 @@ require("codecompanion").setup({
         make_slash_commands = true,
       },
     },
-  },
-})
-require("lspconfig").ruff.setup({
-  init_options = {
-    settings = {},
   },
 })

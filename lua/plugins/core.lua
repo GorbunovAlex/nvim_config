@@ -3,37 +3,8 @@ return {
     "numToStr/Comment.nvim",
   },
   { "nvim-tree/nvim-web-devicons", opts = {} },
-  {
-    "mfussenegger/nvim-dap",
-    lazy = true,
-    dependencies = {
-      "rcarriga/nvim-dap-ui",
-    },
-    keys = {
-      {
-        "<leader>d",
-        function()
-          require("dap").toggle_breakpoint()
-        end,
-      },
-      {
-        "<C-t>",
-        function()
-          require("dapui").toggle()
-        end,
-      },
-      {
-        "<leader>c",
-        function()
-          require("dap").continue()
-        end,
-      },
-    },
-    config = function()
-      require("dapui").setup()
-    end,
-  },
 
+  -- Consolidated nvim-dap definition
   {
     "mfussenegger/nvim-dap",
     dependencies = {
@@ -56,6 +27,12 @@ return {
         end,
       },
       {
+        "<C-t>",
+        function()
+          require("dapui").toggle()
+        end,
+      },
+      {
         "<leader>c",
         function()
           require("dap").continue()
@@ -65,10 +42,15 @@ return {
     config = function()
       local dap, dapui = require("dap"), require("dapui")
 
+      -- Setup Python
+      -- Ensure this path points to a valid python with debugpy installed.
+      -- If using mason, it is usually: vim.fn.stdpath("data") .. "/mason/packages/debugpy/venv/bin/python"
       require("dap-python").setup("~/.virtualenvs/debugpy/bin/python")
+
       require("dapui").setup()
       require("dap-go").setup()
 
+      -- Go Configuration
       table.insert(dap.configurations.go, {
         {
           type = "go",
@@ -79,14 +61,15 @@ return {
         },
       })
 
+      -- Python Configuration
       table.insert(require("dap").configurations.python, {
         type = "python",
         request = "attach",
-        name = "Python Attach",
+        name = "Python Attach docker",
         connect = function()
           local host = vim.fn.input("Host [0.0.0.0]: ")
           host = host ~= "" and host or "0.0.0.0"
-          local port = tonumber(vim.fn.input("Port [9000]: ")) or 9000
+          local port = tonumber(vim.fn.input("Port [9200]: ")) or 9200
           return { host = host, port = port }
         end,
         pathMappings = {
@@ -95,28 +78,15 @@ return {
         justMyCode = false,
       })
 
-      -- local pythonAttachConfig = {
-      --   type = "python",
-      --   request = "attach",
-      --   connect = {
-      --     port = 9000,
-      --     host = "0.0.0.0",
-      --   },
-      --   mode = "remote",
-      --   name = "Container Attach (with choose remote dir)",
-      --   cwd = vim.fn.getcwd(),
-      --   pathMappings = {
-      --     {
-      --       localRoot = vim.fn.getcwd(),
-      --       remoteRoot = function()
-      --         -- NEED to choose correct folder for set breakpoints
-      --         return vim.fn.input("Container code folder > ", ".", "src")
-      --       end,
-      --     },
-      --   },
-      -- }
-      -- table.insert(require("dap").configurations.python, pythonAttachConfig)
+      table.insert(require("dap").configurations.python, {
+        type = "python",
+        request = "attach",
+        name = "Python Attach local",
+        connect = { port = 9200, host = "127.0.0.1" },
+        subProcess = true,
+      })
 
+      -- Dap UI Listeners
       dap.listeners.before.attach.dapui_config = function()
         dapui.open()
       end
@@ -130,18 +100,20 @@ return {
         dapui.close()
       end
 
+      -- Signs
       vim.fn.sign_define(
         "DapBreakpoint",
         { text = "🚨", texthl = "DapBreakpoint", linehl = "DapBreakpoint", numhl = "DapBreakpoint" }
       )
 
+      -- VSCode JS Setup
       require("dap-vscode-js").setup({
         debugger_path = vim.fn.stdpath("data") .. "/lazy/vscode-js-debug",
         adapters = { "pwa-node", "pwa-chrome", "pwa-msedge", "node-terminal", "pwa-extensionHost" },
       })
 
-      local mason_registry = require("mason-registry")
-      local js_debug_path = mason_registry.get_package("js-debug-adapter"):get_install_path()
+      -- FIX: Replaced broken Mason call with standard path
+      local js_debug_path = vim.fn.stdpath("data") .. "/mason/packages/js-debug-adapter"
 
       for _, adapter in ipairs({
         "pwa-node",
@@ -166,14 +138,10 @@ return {
       for _, language in ipairs({ "typescript", "javascript", "vue" }) do
         require("dap").configurations[language] = {
           {
-            -- use nvim-dap-vscode-js's pwa-chrome debug adapter
             type = "pwa-chrome",
             request = "launch",
-            -- name of the debug action
             name = "client: chrome",
-            -- default vite dev server url
             url = "http://localhost:3000",
-            -- for TypeScript/Svelte
             webRoot = "${workspaceFolder}",
             sourceMaps = true,
             protocol = "inspector",
